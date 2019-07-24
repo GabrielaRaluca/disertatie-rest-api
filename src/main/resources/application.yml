@@ -1,0 +1,17 @@
+server:
+  port: 8080
+  contextPath: /travelBuddy
+
+spring:
+  jpa:
+    database: MYSQL
+    show-sql: true
+    hibernate.ddl-auto: update
+  database:
+    driverClassName: com.mysql.jdbc.Driver
+
+  datasource:
+    platform: mysql
+    url: jdbc:mysql://localhost:3306/whattowatch?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    username: root
+    password: root
