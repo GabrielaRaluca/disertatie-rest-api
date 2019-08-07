@@ -12,6 +12,9 @@ spring:
 
   datasource:
     platform: mysql
-    url: jdbc:mysql://localhost:3306/whattowatch?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/travelbuddy?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     password: root
+
+google:
+  clientId: 390737871430-hcbjjurssj6nql69lgn7qt92miruhekv.apps.googleusercontent.com
