@@ -18,3 +18,7 @@ spring:
 
 google:
   clientId: 390737871430-hcbjjurssj6nql69lgn7qt92miruhekv.apps.googleusercontent.com
+
+token:
+  encryptionKey: E155A80E20A0E3D09BA3D775B5791B5494C2E08015EEE1E65DBD518E3DB05794
+  expirationMinutes: 14400

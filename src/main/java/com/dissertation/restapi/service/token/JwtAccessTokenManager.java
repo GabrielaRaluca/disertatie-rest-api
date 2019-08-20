@@ -1,5 +1,7 @@
-package com.dissertation.restapi.token;
+package com.dissertation.restapi.service.token;
 
+import com.dissertation.restapi.exception.BadRequestException;
+import com.dissertation.restapi.exception.JwtException;
 import com.dissertation.restapi.model.User;
 import io.jsonwebtoken.*;
 import org.joda.time.DateTime;
@@ -16,17 +18,20 @@ import java.util.UUID;
 public class JwtAccessTokenManager {
     private final String encryptionKey;
     private final String googleClientId;
-    private final int defaultExpirationSeconds;
+    private final int tokenExpirationMinutes;
 
     private static final Logger LOG = LoggerFactory.getLogger(JwtAccessTokenManager.class);
 
-    public JwtAccessTokenManager(final String encryptionKey, final String googleClientId, final int defaultExpirationSeconds){
+    public JwtAccessTokenManager(final String encryptionKey, final String googleClientId, final int tokenExpirationMinutes){
         this.encryptionKey = encryptionKey;
         this.googleClientId = googleClientId;
-        this.defaultExpirationSeconds = defaultExpirationSeconds;
+        this.tokenExpirationMinutes = tokenExpirationMinutes;
     }
 
     public String createAccessToken(User user){
+        if(user == null){
+            throw new BadRequestException("Could not retrieve user information out of the Google token!");
+        }
 
         try {
             Map<String, Object> claims = new HashMap<>();
@@ -35,7 +40,7 @@ public class JwtAccessTokenManager {
 
             DateTime now = new DateTime(DateTimeZone.UTC);
 
-            Date expirationDate = now.plusMinutes(defaultExpirationSeconds).toDate();
+            Date expirationDate = now.plusMinutes(tokenExpirationMinutes).toDate();
 
             return Jwts.builder()
                     .setClaims(claims)
@@ -47,7 +52,7 @@ public class JwtAccessTokenManager {
         }
         catch(Exception e){
             LOG.error("Could not create access token for user: " + user.toString() + ". Exception: " + e);
-            return null;
+            throw new JwtException("Could not create access token for " + user.toString());
         }
     }
 
@@ -66,7 +71,7 @@ public class JwtAccessTokenManager {
 
         }catch(Exception e){
             LOG.error("Could not decode jwt token! " + e);
-            return null;
+            throw new JwtException("Could not decode jwt token!");
         }
     }
 }

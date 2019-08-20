@@ -1,5 +1,7 @@
 package com.dissertation.restapi.login;
 
+import com.dissertation.restapi.exception.BadRequestException;
+import com.dissertation.restapi.exception.JwtException;
 import com.dissertation.restapi.model.User;
 import com.dissertation.restapi.repository.UserRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -41,8 +43,7 @@ public class GoogleLogin {
     public User getUser(String tokenId){
         if(tokenId.isEmpty()){
             LOG.warn("Empty token id!");
-            return null;
-            //TODO HANDLE EXCEPTION
+            throw new BadRequestException("Empty token id!");
         }
 
         try {
@@ -71,19 +72,16 @@ public class GoogleLogin {
             }
             else{
                 LOG.warn("Invalid tokenId " + tokenId);
-                return null;
-                //todo handle exception
+                throw new JwtException("Invalid token id!");
             }
         } catch (GeneralSecurityException e) {
             e.printStackTrace();
             LOG.warn("Could not verify tokenId " + tokenId);
-            return null;
-            //todo handle exception
+            throw new JwtException("Could not verify token id!");
         } catch (IOException e) {
             e.printStackTrace();
             LOG.warn("Could not verify tokenId " + tokenId);
-            return null;
-            //todo handle exception
+            throw new JwtException("Could not verify token id!");
         }
     }
 }
