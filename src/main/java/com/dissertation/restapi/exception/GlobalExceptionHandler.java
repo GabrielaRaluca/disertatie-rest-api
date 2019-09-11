@@ -16,6 +16,13 @@ public class GlobalExceptionHandler {
         return createErrorResponse(ex);
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorResponse handleEntityNotFound(EntityNotFoundException ex){
+        return createErrorResponse(ex);
+    }
+
     public ErrorResponse createErrorResponse(HttpException ex){
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setStatusCode(ex.getStatusCode());

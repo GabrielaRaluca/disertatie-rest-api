@@ -2,8 +2,10 @@ package com.dissertation.restapi.controller;
 
 
 import com.dissertation.restapi.exception.BadRequestException;
+import com.dissertation.restapi.exception.EntityNotFoundException;
 import com.dissertation.restapi.login.GoogleLogin;
 import com.dissertation.restapi.model.User;
+import com.dissertation.restapi.repository.UserRepository;
 import com.dissertation.restapi.service.token.JwtAccessTokenManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityExistsException;
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Transactional
 @CrossOrigin(origins = "*")
@@ -27,6 +31,9 @@ public class UserController {
 
     @Autowired
     private JwtAccessTokenManager jwtAccessTokenManager;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -42,10 +49,25 @@ public class UserController {
         String accessToken = jwtAccessTokenManager.createAccessToken(user);
 
         ObjectNode responseBody = objectMapper.createObjectNode();
+        responseBody.put("id", user.getId());
         responseBody.put("email", user.getEmail());
         responseBody.put("name", user.getName());
         responseBody.put("picture_url", user.getPictureUrl());
         responseBody.put("access_token", accessToken);
+
+        return ResponseEntity.ok(responseBody);
+    }
+
+    @GetMapping(value="/user/{id}")
+    public ResponseEntity getUserById(@PathVariable("id") Long id){
+        User user = userRepository.findById(id).orElseThrow(() ->
+            new EntityNotFoundException("No such user exists!"));
+
+        ObjectNode responseBody = objectMapper.createObjectNode();
+        responseBody.put("id", user.getId());
+        responseBody.put("email", user.getEmail());
+        responseBody.put("name", user.getName());
+        responseBody.put("picture_url", user.getPictureUrl());
 
         return ResponseEntity.ok(responseBody);
     }

@@ -53,20 +53,19 @@ public class GoogleLogin {
                 GoogleIdToken.Payload payload = googleIdToken.getPayload();
 
                 String email = payload.getEmail();
-                String givenName = (String)payload.get("given_name");
+                String givenName = (String)payload.get("name");
                 String pictureUrl = (String)payload.get("picture");
 
-                User user = this.userRepository.findByEmail(email);
-
-                if(user == null){
-                    user = User.builder()
+                User user = this.userRepository.findByEmail(email).orElseGet(() -> {
+                    User newUser = User.builder()
                             .email(email)
                             .name(givenName)
                             .pictureUrl(pictureUrl)
                             .build();
 
-                    userRepository.save(user);
-                }
+                    userRepository.save(newUser);
+                    return newUser;
+                });
 
                 return user;
             }
