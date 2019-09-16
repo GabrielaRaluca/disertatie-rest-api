@@ -23,6 +23,9 @@ public class TravelPost {
     private User uploader;
 
     @Column
+    private String title;
+
+    @Column
     private String location;
 
     @Column
