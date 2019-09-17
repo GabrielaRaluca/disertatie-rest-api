@@ -6,6 +6,7 @@ import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,6 +50,9 @@ public class ImagesContentController {
 
         travelPostRepository.save(travelPost);
 
-        return ResponseEntity.ok().build();
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("success", true);
+
+        return ResponseEntity.ok(response);
     }
 }
