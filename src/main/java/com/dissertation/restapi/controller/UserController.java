@@ -48,12 +48,16 @@ public class UserController {
 
         String accessToken = jwtAccessTokenManager.createAccessToken(user);
 
+        ObjectNode userData = objectMapper.createObjectNode();
+        userData.put("id", user.getId());
+        userData.put("email", user.getEmail());
+        userData.put("name", user.getName());
+        userData.put("picture_url", user.getPictureUrl());
+        userData.put("access_token", accessToken);
+
         ObjectNode responseBody = objectMapper.createObjectNode();
-        responseBody.put("id", user.getId());
-        responseBody.put("email", user.getEmail());
-        responseBody.put("name", user.getName());
-        responseBody.put("picture_url", user.getPictureUrl());
-        responseBody.put("access_token", accessToken);
+        responseBody.put("success", true);
+        responseBody.set("data", userData);
 
         return ResponseEntity.ok(responseBody);
     }
@@ -63,11 +67,15 @@ public class UserController {
         User user = userRepository.findById(id).orElseThrow(() ->
             new EntityNotFoundException("No such user exists!"));
 
+        ObjectNode userData = objectMapper.createObjectNode();
+        userData.put("id", user.getId());
+        userData.put("email", user.getEmail());
+        userData.put("name", user.getName());
+        userData.put("picture_url", user.getPictureUrl());
+
         ObjectNode responseBody = objectMapper.createObjectNode();
-        responseBody.put("id", user.getId());
-        responseBody.put("email", user.getEmail());
-        responseBody.put("name", user.getName());
-        responseBody.put("picture_url", user.getPictureUrl());
+        responseBody.put("success", true);
+        responseBody.set("data", userData);
 
         return ResponseEntity.ok(responseBody);
     }
