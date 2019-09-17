@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.awt.*;
 import java.io.IOException;
 
 @RestController
 @Transactional
-@RequestMapping("/iamgescontent")
+@RequestMapping("/imagescontent")
 @CrossOrigin(origins = "*")
 public class ImagesContentController {
     private final ImagesContentRepository imagesContentRepository;

@@ -32,6 +32,6 @@ public class TravelPost {
     @Column
     private String description;
 
-    @OneToMany
+    @OneToMany (cascade = CascadeType.ALL)
     private List<ImagesContent> images;
 }
