@@ -15,10 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-
-import javax.persistence.EntityExistsException;
 import javax.transaction.Transactional;
-import java.util.Optional;
 
 @Transactional
 @CrossOrigin(origins = "*")
@@ -26,16 +23,19 @@ import java.util.Optional;
 //@RequestMapping(path="/users")
 public class UserController {
 
-    @Autowired
-    private GoogleLogin googleLogin;
+    private final GoogleLogin googleLogin;
 
-    @Autowired
-    private JwtAccessTokenManager jwtAccessTokenManager;
+    private final JwtAccessTokenManager jwtAccessTokenManager;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public UserController(GoogleLogin googleLogin, JwtAccessTokenManager jwtAccessTokenManager, UserRepository userRepository){
+        this.googleLogin = googleLogin;
+        this.jwtAccessTokenManager = jwtAccessTokenManager;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity login(@RequestBody MultiValueMap<String, String> formData) throws JsonProcessingException {

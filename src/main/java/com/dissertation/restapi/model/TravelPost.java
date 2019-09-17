@@ -19,7 +19,8 @@ public class TravelPost {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "userId")
     private User uploader;
 
     @Column
@@ -32,5 +33,5 @@ public class TravelPost {
     private String description;
 
     @OneToMany
-    private List<TravelPostImages> images;
+    private List<ImagesContent> images;
 }

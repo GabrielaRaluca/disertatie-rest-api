@@ -12,7 +12,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class TravelPostImages {
+public class ImagesContent {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
