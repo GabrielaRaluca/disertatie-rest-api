@@ -14,10 +14,10 @@ spring:
     platform: mysql
     url: jdbc:mysql://localhost:3306/travelbuddy?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
-    password: root
+    password: root1234
 
 google:
-  clientId: 390737871430-hcbjjurssj6nql69lgn7qt92miruhekv.apps.googleusercontent.com
+  clientId: 390737871430-s7oklu3dh7kthlbcuffhvpodl5dsars4.apps.googleusercontent.com
 
 token:
   encryptionKey: E155A80E20A0E3D09BA3D775B5791B5494C2E08015EEE1E65DBD518E3DB05794
