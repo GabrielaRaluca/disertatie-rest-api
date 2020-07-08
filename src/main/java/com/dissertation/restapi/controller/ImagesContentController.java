@@ -7,6 +7,7 @@ import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,17 @@ public class ImagesContentController {
     public ImagesContentController(ImagesContentRepository imagesContentRepository, TravelPostRepository travelPostRepository){
         this.imagesContentRepository = imagesContentRepository;
         this.travelPostRepository = travelPostRepository;
+    }
+
+    @GetMapping("/{imageId}")
+    ResponseEntity getPostImagesContent(@PathVariable Long imageId) {
+        ImagesContent imageContent = imagesContentRepository.findById(imageId)
+                .orElseThrow(() -> new EntityNotFoundException("No image found!"));
+
+        return ResponseEntity.ok()
+                .contentLength(imageContent.getSize())
+                .contentType(MediaType.parseMediaType(imageContent.getMediaType()))
+                .body(imageContent.getContent());
     }
 
     @PostMapping("/{travelPostId}")

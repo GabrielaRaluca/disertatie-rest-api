@@ -2,7 +2,6 @@ package com.dissertation.restapi.controller;
 
 import com.dissertation.restapi.exception.BadRequestException;
 import com.dissertation.restapi.exception.EntityNotFoundException;
-import com.dissertation.restapi.exception.HttpException;
 import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.model.User;
 import com.dissertation.restapi.repository.TravelPostRepository;
@@ -32,7 +31,7 @@ public class TravelPostController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     ResponseEntity getTravelPost(@PathVariable Long id){
         TravelPost travelPost = travelPostRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("No travel post found for id " + id)
@@ -81,6 +80,36 @@ public class TravelPostController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user/{userId}")
+    ResponseEntity getTravelPostsByUserId(@PathVariable Long userId) {
+        List<TravelPost> travelPosts = travelPostRepository.findByUploaderId(userId).orElseThrow(
+                () -> new EntityNotFoundException("No travel post found for user " + userId)
+        );
+
+        ArrayNode responseArray = objectMapper.createArrayNode();
+
+        for(TravelPost travelPost : travelPosts){
+            ArrayNode imagesIds = objectMapper.createArrayNode();
+            travelPost.getImages().forEach(imagesContent -> imagesIds.add(imagesContent.getId()));
+
+            ObjectNode userData = objectMapper.createObjectNode();
+            userData.put("id", travelPost.getId());
+            userData.put("description", travelPost.getDescription());
+            userData.put("title", travelPost.getTitle());
+            userData.put("location", travelPost.getLocation());
+            userData.set("images", imagesIds);
+
+            responseArray.add(userData);
+        }
+
+        ObjectNode response = objectMapper.createObjectNode();
+        response.put("success", true);
+        response.set("data", responseArray);
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/{userId}")
     ResponseEntity addTravelPost(@PathVariable Long userId, @RequestBody TravelPost travelPostBody){
         if(travelPostRepository.findByTitleAndUploaderId(travelPostBody.getTitle(), userId).isPresent()){
