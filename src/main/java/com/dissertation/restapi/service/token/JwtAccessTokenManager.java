@@ -58,10 +58,11 @@ public class JwtAccessTokenManager {
 
     public User extractAccessToken(String accessToken){
         try{
-            String unsignedJwt = accessToken.substring(accessToken.indexOf("."), accessToken.length());
-            Jwt<Header, Claims> jwt = Jwts.parser().parse(accessToken);
+            Jws<Claims> claimsJws = Jwts.parser()
+                    .setSigningKey(encryptionKey)
+                    .parseClaimsJws(accessToken);
 
-            Claims claims = jwt.getBody();
+            Claims claims = claimsJws.getBody();
 
             User user = User.builder()
                     .email(claims.get("email", String.class))

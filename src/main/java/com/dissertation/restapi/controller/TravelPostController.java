@@ -60,7 +60,7 @@ public class TravelPostController {
         Iterable<TravelPost> travelPosts = travelPostRepository.findAll();
         ArrayNode responseArray = objectMapper.createArrayNode();
 
-        for(TravelPost travelPost : travelPosts){
+        for(TravelPost travelPost : travelPosts) {
             ArrayNode imagesIds = objectMapper.createArrayNode();
             travelPost.getImages().forEach(imagesContent -> imagesIds.add(imagesContent.getId()));
 

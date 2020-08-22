@@ -3,7 +3,7 @@ package com.dissertation.restapi.exception;
 import lombok.Getter;
 
 @Getter
-public class HttpException extends RuntimeException{
+public class HttpException extends RuntimeException {
     private final String statusCode;
 
     protected HttpException(String statusCode, String message){
