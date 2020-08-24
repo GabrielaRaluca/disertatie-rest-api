@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Transactional
 @CrossOrigin(origins = "*")
@@ -38,9 +39,15 @@ public class UserController {
     }
 
     @PostMapping(value = "/login/google", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity login(@RequestBody MultiValueMap<String, String> formData) throws JsonProcessingException {
-        if(formData == null || formData.getFirst("googleIdToken") == null){
-            throw new BadRequestException("Requested body not present!");
+    public ResponseEntity login(@RequestBody MultiValueMap<String, String> formData) {
+        ObjectNode responseBody = objectMapper.createObjectNode();
+
+        if(formData == null || formData.getFirst("googleIdToken") == null) {
+            responseBody.put("success", true);
+            responseBody.put("message", "Missing token");
+            responseBody.put("statusCode", "400");
+
+            return ResponseEntity.badRequest().body(responseBody);
         }
 
         String googleIdToken = formData.getFirst("googleIdToken");
@@ -55,7 +62,6 @@ public class UserController {
         userData.put("picture_url", user.getPictureUrl());
         userData.put("access_token", accessToken);
 
-        ObjectNode responseBody = objectMapper.createObjectNode();
         responseBody.put("success", true);
         responseBody.set("data", userData);
 
@@ -64,19 +70,28 @@ public class UserController {
 
     @GetMapping(value="/user/{id}")
     public ResponseEntity getUserById(@PathVariable("id") Long id){
-        User user = userRepository.findById(id).orElseThrow(() ->
-            new EntityNotFoundException("No such user exists!"));
-
-        ObjectNode userData = objectMapper.createObjectNode();
-        userData.put("id", user.getId());
-        userData.put("email", user.getEmail());
-        userData.put("name", user.getName());
-        userData.put("picture_url", user.getPictureUrl());
-
+        Optional<User> optionalUser = userRepository.findById(id);
         ObjectNode responseBody = objectMapper.createObjectNode();
-        responseBody.put("success", true);
-        responseBody.set("data", userData);
 
-        return ResponseEntity.ok(responseBody);
+        if (!optionalUser.isPresent()) {
+            responseBody.put("success", false);
+            responseBody.put("message", "No user exists with id " + id);
+            responseBody.put("statusCode", 400);
+
+            return ResponseEntity.badRequest().body(responseBody);
+
+        } else {
+            User user = optionalUser.get();
+            ObjectNode userData = objectMapper.createObjectNode();
+            userData.put("id", user.getId());
+            userData.put("email", user.getEmail());
+            userData.put("name", user.getName());
+            userData.put("picture_url", user.getPictureUrl());
+
+            responseBody.put("success", true);
+            responseBody.set("data", userData);
+
+            return ResponseEntity.ok(responseBody);
+        }
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @Transactional
@@ -25,46 +26,61 @@ public class ImagesContentController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ImagesContentController(ImagesContentRepository imagesContentRepository, TravelPostRepository travelPostRepository){
+    public ImagesContentController(ImagesContentRepository imagesContentRepository,
+                                   TravelPostRepository travelPostRepository){
         this.imagesContentRepository = imagesContentRepository;
         this.travelPostRepository = travelPostRepository;
     }
 
     @GetMapping("/{imageId}")
     ResponseEntity getPostImagesContent(@PathVariable Long imageId) {
-        ImagesContent imageContent = imagesContentRepository.findById(imageId)
-                .orElseThrow(() -> new EntityNotFoundException("No image found!"));
+        Optional<ImagesContent> optionalImageContent = imagesContentRepository.findById(imageId);
+        if(!optionalImageContent.isPresent()) {
+            return ResponseEntity.badRequest().build();
+        } else {
+            ImagesContent imageContent = optionalImageContent.get();
 
-        return ResponseEntity.ok()
-                .contentLength(imageContent.getSize())
-                .contentType(MediaType.parseMediaType(imageContent.getMediaType()))
-                .body(imageContent.getContent());
+            return ResponseEntity.ok()
+                    .contentLength(imageContent.getSize())
+                    .contentType(MediaType.parseMediaType(imageContent.getMediaType()))
+                    .body(imageContent.getContent());
+        }
     }
 
     @PostMapping("/{travelPostId}")
-    ResponseEntity addImagesContent(@PathVariable Long travelPostId, @RequestParam("file") MultipartFile[] files) throws IOException {
-        TravelPost travelPost = travelPostRepository.findById(travelPostId)
-                .orElseThrow(() -> new EntityNotFoundException("No post found!"));
-
-        for(int i = 0; i < files.length; i++){
-            byte[] fileContent = files[i].getBytes();
-            long size = files[i].getSize();
-            String contentType = files[i].getContentType();
-
-            ImagesContent imagesContent = ImagesContent.builder()
-                    .content(fileContent)
-                    .size(size)
-                    .mediaType(contentType)
-                    .build();
-
-            travelPost.getImages().add(imagesContent);
-        }
-
-        travelPostRepository.save(travelPost);
-
+    ResponseEntity addImagesContent(@PathVariable Long travelPostId, @RequestParam("file") MultipartFile[] files)
+            throws IOException {
+        Optional<TravelPost> optionalTravelPost = travelPostRepository.findById(travelPostId);
         ObjectNode response = objectMapper.createObjectNode();
-        response.put("success", true);
 
-        return ResponseEntity.ok(response);
+        if(!optionalTravelPost.isPresent()) {
+            response.put("success", false);
+            response.put("message", "No post exists with id " + travelPostId );
+            response.put("statusCode", 400);
+
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            TravelPost travelPost = optionalTravelPost.get();
+
+            for(int i = 0; i < files.length; i++){
+                byte[] fileContent = files[i].getBytes();
+                long size = files[i].getSize();
+                String contentType = files[i].getContentType();
+
+                ImagesContent imagesContent = ImagesContent.builder()
+                        .content(fileContent)
+                        .size(size)
+                        .mediaType(contentType)
+                        .build();
+
+                travelPost.getImages().add(imagesContent);
+            }
+
+            travelPostRepository.save(travelPost);
+
+            response.put("success", true);
+
+            return ResponseEntity.ok(response);
+        }
     }
 }
