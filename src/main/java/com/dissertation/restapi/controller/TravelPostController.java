@@ -131,7 +131,7 @@ public class TravelPostController {
         Optional<User> optionalUploader = userRepository.findById(userId);
         if(!optionalUploader.isPresent()) {
             response.put("success", false);
-            response.put("message", "No use exists with id " + userId);
+            response.put("message", "No user exists with id " + userId);
             response.put("statusCode", 400);
 
             return ResponseEntity.badRequest().body(response);
