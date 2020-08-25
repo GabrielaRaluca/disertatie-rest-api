@@ -4,6 +4,7 @@ import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.model.User;
 import com.dissertation.restapi.repository.TravelPostRepository;
 import com.dissertation.restapi.repository.UserRepository;
+import com.dissertation.restapi.service.SentimentAnalysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,13 +23,16 @@ import java.util.Optional;
 public class TravelPostController {
     private final TravelPostRepository travelPostRepository;
     private final UserRepository userRepository;
+    private final SentimentAnalysis sentimentAnalysis;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TravelPostController(TravelPostRepository travelPostRepository,
-                                UserRepository userRepository){
+                                UserRepository userRepository,
+                                SentimentAnalysis sentimentAnalysis){
         this.travelPostRepository = travelPostRepository;
         this.userRepository = userRepository;
+        this.sentimentAnalysis = sentimentAnalysis;
     }
 
     @GetMapping("/{id}")
@@ -140,6 +145,12 @@ public class TravelPostController {
 
             travelPostBody.setUploader(uploader);
             TravelPost travelPost = travelPostRepository.save(travelPostBody);
+
+            try {
+                sentimentAnalysis.analyze(travelPost.getDescription());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             ObjectNode userData = objectMapper.createObjectNode();
             userData.put("id", travelPost.getId());
