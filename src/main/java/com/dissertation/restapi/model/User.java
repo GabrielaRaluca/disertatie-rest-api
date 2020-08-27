@@ -29,6 +29,9 @@ public class User {
     String pictureUrl;
 
     @Column
+    String description;
+
+    @Column
     @ManyToMany
     List<User> unfollowed;
 
