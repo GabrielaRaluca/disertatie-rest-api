@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Builder
@@ -26,4 +27,9 @@ public class User {
 
     @Column(nullable = false, name = "picture_url")
     String pictureUrl;
+
+    @Column
+    @ManyToMany
+    List<User> unfollowed;
+
 }

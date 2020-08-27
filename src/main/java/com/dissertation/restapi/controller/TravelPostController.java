@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +58,8 @@ public class TravelPostController {
             userData.put("description", travelPost.getDescription());
             userData.put("title", travelPost.getTitle());
             userData.put("location", travelPost.getLocation());
+            userData.put("creationDate", travelPost.getCreationDate().toString());
+
             userData.set("images", imagesIds);
 
             response.put("success", true);
@@ -81,6 +84,8 @@ public class TravelPostController {
             userData.put("description", travelPost.getDescription());
             userData.put("title", travelPost.getTitle());
             userData.put("location", travelPost.getLocation());
+            userData.put("creationDate", travelPost.getCreationDate().toString());
+
             userData.set("images", imagesIds);
 
             responseArray.add(userData);
@@ -111,6 +116,7 @@ public class TravelPostController {
                 userData.put("description", travelPost.getDescription());
                 userData.put("title", travelPost.getTitle());
                 userData.put("location", travelPost.getLocation());
+                userData.put("creationDate", travelPost.getCreationDate().toString());
                 userData.set("images", imagesIds);
 
                 responseArray.add(userData);
@@ -144,6 +150,7 @@ public class TravelPostController {
             User uploader = optionalUploader.get();
 
             travelPostBody.setUploader(uploader);
+            travelPostBody.setCreationDate(Instant.now());
             TravelPost travelPost = travelPostRepository.save(travelPostBody);
 
             try {
@@ -157,6 +164,7 @@ public class TravelPostController {
             userData.put("description", travelPost.getDescription());
             userData.put("title", travelPost.getTitle());
             userData.put("location", travelPost.getLocation());
+            userData.put("creationDate", travelPost.getCreationDate().toString());
 
             response.put("success", true);
             response.set("data", userData);

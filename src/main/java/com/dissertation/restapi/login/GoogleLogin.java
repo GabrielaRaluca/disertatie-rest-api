@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class GoogleLogin {
@@ -61,6 +62,7 @@ public class GoogleLogin {
                             .email(email)
                             .name(givenName)
                             .pictureUrl(pictureUrl)
+                            .unfollowed(new ArrayList<>())
                             .build();
 
                     userRepository.save(newUser);

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -25,6 +26,9 @@ public class TravelPost {
 
     @Column
     private String title;
+
+    @Column(nullable = false, name = "date_created")
+    Instant creationDate;
 
     @Column
     private String location;
