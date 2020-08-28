@@ -59,6 +59,7 @@ public class TravelPostController {
             userData.put("title", travelPost.getTitle());
             userData.put("location", travelPost.getLocation());
             userData.put("creationDate", travelPost.getCreationDate().toString());
+            userData.put("uploaderId", travelPost.getUploader().getId());
 
             userData.set("images", imagesIds);
 
@@ -85,6 +86,7 @@ public class TravelPostController {
             userData.put("title", travelPost.getTitle());
             userData.put("location", travelPost.getLocation());
             userData.put("creationDate", travelPost.getCreationDate().toString());
+            userData.put("uploaderId", travelPost.getUploader().getId());
 
             userData.set("images", imagesIds);
 
@@ -117,6 +119,7 @@ public class TravelPostController {
                 userData.put("title", travelPost.getTitle());
                 userData.put("location", travelPost.getLocation());
                 userData.put("creationDate", travelPost.getCreationDate().toString());
+                userData.put("uploaderId", travelPost.getUploader().getId());
                 userData.set("images", imagesIds);
 
                 responseArray.add(userData);
@@ -165,6 +168,7 @@ public class TravelPostController {
             userData.put("title", travelPost.getTitle());
             userData.put("location", travelPost.getLocation());
             userData.put("creationDate", travelPost.getCreationDate().toString());
+            userData.put("uploaderId", travelPost.getUploader().getId());
 
             response.put("success", true);
             response.set("data", userData);
