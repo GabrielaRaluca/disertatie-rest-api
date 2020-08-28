@@ -1,7 +1,9 @@
 package com.dissertation.restapi.controller;
 
+import com.dissertation.restapi.model.ImagesContent;
 import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.model.User;
+import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
 import com.dissertation.restapi.repository.UserRepository;
 import com.dissertation.restapi.service.SentimentAnalysis;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,15 +27,18 @@ import java.util.Optional;
 public class TravelPostController {
     private final TravelPostRepository travelPostRepository;
     private final UserRepository userRepository;
+    private final ImagesContentRepository imagesContentRepository;
     private final SentimentAnalysis sentimentAnalysis;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TravelPostController(TravelPostRepository travelPostRepository,
                                 UserRepository userRepository,
+                                ImagesContentRepository imagesContentRepository,
                                 SentimentAnalysis sentimentAnalysis){
         this.travelPostRepository = travelPostRepository;
         this.userRepository = userRepository;
+        this.imagesContentRepository = imagesContentRepository;
         this.sentimentAnalysis = sentimentAnalysis;
     }
 
@@ -172,6 +178,91 @@ public class TravelPostController {
 
             response.put("success", true);
             response.set("data", userData);
+
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @PutMapping("/{userId}/{postId}")
+    public ResponseEntity updatePost(@PathVariable Long userId,
+                                     @PathVariable Long postId,
+                                     @RequestBody ObjectNode travelPostBody) {
+        ObjectNode response = objectMapper.createObjectNode();
+
+        Optional<TravelPost> optionalTravelPost = travelPostRepository.findById(postId);
+        if (!optionalTravelPost.isPresent()) {
+            response.put("success", false);
+            response.put("message", "No post exists with id " + postId);
+            response.put("statusCode", 400);
+
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            Optional<TravelPost> optionalExistingTravelPost =
+                    travelPostRepository.findByTitleAndUploaderId(travelPostBody.get("title").asText(), userId);
+            if(optionalExistingTravelPost.isPresent() && optionalExistingTravelPost.get().getId() != postId) {
+                response.put("success", false);
+                response.put("message", "You already have a post with the same title!");
+                response.put("statusCode", 400);
+
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            List<ImagesContent> currentImages = new ArrayList<>();
+            ArrayNode arrayNode = (ArrayNode) travelPostBody.get("images");
+
+            for(int i = 0; i < arrayNode.size(); i++) {
+                long imageId = arrayNode.get(i).asLong();
+                Optional<ImagesContent> optionalExistingImage = imagesContentRepository.findById(imageId);
+                if (!optionalExistingImage.isPresent()) {
+                    response.put("success", false);
+                    response.put("message", "Some of the provided img ids do not exist");
+                    response.put("statusCode", 400);
+
+                    return ResponseEntity.badRequest().body(response);
+                } else {
+                    currentImages.add(optionalExistingImage.get());
+                }
+            }
+
+            TravelPost travelPost = optionalTravelPost.get();
+            travelPost.setDescription(travelPostBody.get("description").asText());
+            travelPost.setTitle(travelPostBody.get("title").asText());
+            travelPost.setLocation(travelPostBody.get("location").asText());
+            travelPost.setImages(currentImages);
+
+            travelPostRepository.save(travelPost);
+
+            ObjectNode userData = objectMapper.createObjectNode();
+            userData.put("id", travelPost.getId());
+            userData.put("description", travelPost.getDescription());
+            userData.put("title", travelPost.getTitle());
+            userData.put("location", travelPost.getLocation());
+            userData.put("creationDate", travelPost.getCreationDate().toString());
+            userData.put("uploaderId", travelPost.getUploader().getId());
+
+            response.put("success", true);
+            response.set("data", userData);
+
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity deletePost(@PathVariable Long postId) {
+        ObjectNode response = objectMapper.createObjectNode();
+
+        Optional<TravelPost> optionalTravelPost = travelPostRepository.findById(postId);
+        if (!optionalTravelPost.isPresent()) {
+            response.put("success", false);
+            response.put("message", "No post exists with id " + postId);
+            response.put("statusCode", 400);
+
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            TravelPost travelPost = optionalTravelPost.get();
+            travelPostRepository.delete(travelPost);
+
+            response.put("success", true);
 
             return ResponseEntity.ok(response);
         }
