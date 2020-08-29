@@ -1,11 +1,14 @@
 package com.dissertation.restapi.controller;
 
 import com.dissertation.restapi.model.ImagesContent;
+import com.dissertation.restapi.model.Label;
 import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
+import com.dissertation.restapi.service.VisionApiService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -22,13 +29,16 @@ import java.util.Optional;
 public class ImagesContentController {
     private final ImagesContentRepository imagesContentRepository;
     private final TravelPostRepository travelPostRepository;
+    private final VisionApiService visionApiService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ImagesContentController(ImagesContentRepository imagesContentRepository,
-                                   TravelPostRepository travelPostRepository){
+                                   TravelPostRepository travelPostRepository,
+                                   VisionApiService visionApiService){
         this.imagesContentRepository = imagesContentRepository;
         this.travelPostRepository = travelPostRepository;
+        this.visionApiService = visionApiService;
     }
 
     @GetMapping("/{imageId}")
@@ -73,6 +83,25 @@ public class ImagesContentController {
                         .build();
 
                 travelPost.getImages().add(imagesContent);
+
+
+                try {
+                    List<Label> imageLabels = visionApiService.getLabels(imagesContent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    response.put("success", false);
+                    response.put("statusCode", 500);
+                    response.put("message", e.getMessage());
+
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                    response.put("success", false);
+                    response.put("statusCode", 500);
+                    response.put("message", e.getMessage());
+
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                }
             }
 
             travelPostRepository.save(travelPost);
@@ -110,6 +139,24 @@ public class ImagesContentController {
                         .build();
 
                 travelPost.getImages().add(imagesContent);
+
+                try {
+                    List<Label> imageLabels = visionApiService.getLabels(imagesContent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    response.put("success", false);
+                    response.put("statusCode", 500);
+                    response.put("message", e.getMessage());
+
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                    response.put("success", false);
+                    response.put("statusCode", 500);
+                    response.put("message", e.getMessage());
+
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                }
             }
 
             travelPostRepository.save(travelPost);
