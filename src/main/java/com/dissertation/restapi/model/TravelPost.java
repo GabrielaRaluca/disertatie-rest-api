@@ -36,6 +36,9 @@ public class TravelPost {
     @Column
     private String description;
 
+    @Column
+    private float score;
+
     @OneToMany (cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ImagesContent> images;
 }

@@ -5,6 +5,7 @@ import com.dissertation.restapi.model.Label;
 import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
+import com.dissertation.restapi.service.AnalysisService;
 import com.dissertation.restapi.service.VisionApiService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -30,15 +31,18 @@ public class ImagesContentController {
     private final ImagesContentRepository imagesContentRepository;
     private final TravelPostRepository travelPostRepository;
     private final VisionApiService visionApiService;
+    private final AnalysisService analysisService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ImagesContentController(ImagesContentRepository imagesContentRepository,
                                    TravelPostRepository travelPostRepository,
-                                   VisionApiService visionApiService){
+                                   VisionApiService visionApiService,
+                                   AnalysisService analysisService){
         this.imagesContentRepository = imagesContentRepository;
         this.travelPostRepository = travelPostRepository;
         this.visionApiService = visionApiService;
+        this.analysisService = analysisService;
     }
 
     @GetMapping("/{imageId}")
@@ -84,9 +88,11 @@ public class ImagesContentController {
 
                 travelPost.getImages().add(imagesContent);
 
-
                 try {
                     List<Label> imageLabels = visionApiService.getLabels(imagesContent);
+                    analysisService.calculatePreferences(travelPost.getUploader(),
+                            travelPost.getScore(), imageLabels);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     response.put("success", false);

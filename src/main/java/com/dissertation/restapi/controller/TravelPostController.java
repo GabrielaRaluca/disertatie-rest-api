@@ -160,13 +160,15 @@ public class TravelPostController {
 
             travelPostBody.setUploader(uploader);
             travelPostBody.setCreationDate(Instant.now());
-            TravelPost travelPost = travelPostRepository.save(travelPostBody);
 
             try {
-                sentimentAnalysis.analyze(travelPost.getDescription());
+                float score = sentimentAnalysis.analyze(travelPostBody.getDescription());
+                travelPostBody.setScore(score);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            TravelPost travelPost = travelPostRepository.save(travelPostBody);
 
             ObjectNode userData = objectMapper.createObjectNode();
             userData.put("id", travelPost.getId());

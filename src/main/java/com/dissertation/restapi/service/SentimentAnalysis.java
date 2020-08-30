@@ -20,7 +20,7 @@ public class SentimentAnalysis {
     RestTemplate restTemplate = new RestTemplate();
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public void analyze(String description) throws IOException {
+    public float analyze(String description) throws IOException {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
@@ -31,5 +31,8 @@ public class SentimentAnalysis {
         String results = restTemplate.postForObject(analyzerApi, request, String.class);
 
         JsonNode response = objectMapper.readTree(results);
+        float score = (float)response.get("score").asDouble();
+
+        return score;
     }
 }
