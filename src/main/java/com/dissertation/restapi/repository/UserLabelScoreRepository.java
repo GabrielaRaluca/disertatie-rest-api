@@ -8,5 +8,4 @@ import java.util.Optional;
 
 public interface UserLabelScoreRepository extends CrudRepository<UserLabelScore, Long> {
     Optional<List<UserLabelScore>> findByUserId(Long userId);
-
 }

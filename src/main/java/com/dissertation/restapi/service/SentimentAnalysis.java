@@ -2,6 +2,7 @@ package com.dissertation.restapi.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,11 +29,25 @@ public class SentimentAnalysis {
         body.put("description", description);
 
         HttpEntity<String> request = new HttpEntity(body, httpHeaders);
-        String results = restTemplate.postForObject(analyzerApi, request, String.class);
+        String results = restTemplate.postForObject(analyzerApi + "/sentiment", request, String.class);
 
         JsonNode response = objectMapper.readTree(results);
         float score = (float)response.get("score").asDouble();
 
         return score;
+    }
+
+    public void getSimilarities(ArrayNode reqBody) throws IOException {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+
+        ObjectNode body = objectMapper.createObjectNode();
+        body.set("scores", reqBody);
+
+        HttpEntity<String> request = new HttpEntity(body, httpHeaders);
+        String results = restTemplate.postForObject(analyzerApi + "/similarity", request, String.class);
+
+        JsonNode response = objectMapper.readTree(results);
+        //TODO
     }
 }

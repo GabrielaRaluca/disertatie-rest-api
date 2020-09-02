@@ -1,7 +1,11 @@
 import flask
+import pandas as pd
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from flask import request, jsonify
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer 
-  
+from sklearn.metrics.pairwise import cosine_similarity
+
 # function to print sentiments 
 # of the sentence. 
 def sentiment_scores(sentence): 
@@ -36,8 +40,39 @@ def sentiment_scores(sentence):
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+def create_label_vectors(body):
 
-@app.route('/', methods=['POST'])
+	variables = body[0].keys()
+
+	df = pd.DataFrame(body, columns = variables)
+	Mean = df.groupby(by="userId",as_index=False)['score'].mean()
+	Rating_avg = pd.merge(df,Mean,on='userId')
+	Rating_avg['avg']=Rating_avg['score_x']-Rating_avg['score_y']
+	get_user_similarity(Rating_avg)
+	return df
+
+def get_user_similarity(matrix):
+	final=pd.pivot_table(matrix,values='score_x',index='userId',columns='label')
+	print(final)
+	final_scores = final.fillna(0)
+	print(final_scores)
+
+	cosine = cosine_similarity(final_scores)
+	np.fill_diagonal(cosine, 0)
+	similarities =pd.DataFrame(cosine,index=final_scores.index)
+	similarities.columns=final_scores.index
+	
+	print(similarities)
+
+
+@app.route('/similarity', methods=['POST'])
+def get_user_profiles():
+    data = request.json 
+    response = create_label_vectors(data['scores'])
+    return response
+
+
+@app.route('/sentiment', methods=['POST'])
 def analyse():
     data = request.json 
     print(data)

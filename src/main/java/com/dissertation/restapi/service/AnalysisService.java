@@ -20,7 +20,7 @@ public class AnalysisService {
         labelList.stream().forEach(label -> {
             userLabelScoreRepository.save(UserLabelScore.builder().userId(user)
                     .label(label.getDescription())
-            .score( label.getScore() * postScore).build());
+            .score(label.getScore() * postScore).build());
         });
     }
 }

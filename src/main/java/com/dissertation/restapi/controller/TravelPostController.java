@@ -3,8 +3,10 @@ package com.dissertation.restapi.controller;
 import com.dissertation.restapi.model.ImagesContent;
 import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.model.User;
+import com.dissertation.restapi.model.UserLabelScore;
 import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
+import com.dissertation.restapi.repository.UserLabelScoreRepository;
 import com.dissertation.restapi.repository.UserRepository;
 import com.dissertation.restapi.service.SentimentAnalysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +19,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,17 +32,41 @@ public class TravelPostController {
     private final UserRepository userRepository;
     private final ImagesContentRepository imagesContentRepository;
     private final SentimentAnalysis sentimentAnalysis;
+    private final UserLabelScoreRepository userLabelScoreRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TravelPostController(TravelPostRepository travelPostRepository,
                                 UserRepository userRepository,
                                 ImagesContentRepository imagesContentRepository,
-                                SentimentAnalysis sentimentAnalysis){
+                                SentimentAnalysis sentimentAnalysis,
+                                UserLabelScoreRepository userLabelScoreRepository){
         this.travelPostRepository = travelPostRepository;
         this.userRepository = userRepository;
         this.imagesContentRepository = imagesContentRepository;
         this.sentimentAnalysis = sentimentAnalysis;
+        this.userLabelScoreRepository = userLabelScoreRepository;
+    }
+
+    @GetMapping("/userlabels")
+    ResponseEntity getUserLabelScores() throws IOException {
+        ObjectNode response = objectMapper.createObjectNode();
+        ArrayNode userLabelScores = objectMapper.createArrayNode();
+        Iterator<UserLabelScore> iterator = userLabelScoreRepository.findAll().iterator();
+        while(iterator.hasNext()) {
+            UserLabelScore userLabelScore = iterator.next();
+            ObjectNode userLabelScoreObject = objectMapper.createObjectNode();
+            userLabelScoreObject.put("userId", userLabelScore.getUserId().getId());
+            userLabelScoreObject.put("label", userLabelScore.getLabel());
+            userLabelScoreObject.put("score", userLabelScore.getScore());
+
+            userLabelScores.add(userLabelScoreObject);
+        }
+
+        sentimentAnalysis.getSimilarities(userLabelScores);
+
+        response.put("success", true);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
