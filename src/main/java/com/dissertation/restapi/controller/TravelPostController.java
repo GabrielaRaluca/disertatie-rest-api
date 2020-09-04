@@ -52,26 +52,26 @@ public class TravelPostController {
         this.analysisService = analysisService;
     }
 
-    @GetMapping("/userlabels")
-    ResponseEntity getUserLabelScores() throws IOException {
-        ObjectNode response = objectMapper.createObjectNode();
-        ArrayNode userLabelScores = objectMapper.createArrayNode();
-        Iterator<UserLabelScore> iterator = userLabelScoreRepository.findAll().iterator();
-        while(iterator.hasNext()) {
-            UserLabelScore userLabelScore = iterator.next();
-            ObjectNode userLabelScoreObject = objectMapper.createObjectNode();
-            userLabelScoreObject.put("userId", userLabelScore.getUserId().getId());
-            userLabelScoreObject.put("label", userLabelScore.getLabel());
-            userLabelScoreObject.put("score", userLabelScore.getScore());
-
-            userLabelScores.add(userLabelScoreObject);
-        }
-
-        analysisService.getSimilarities(userLabelScores);
-
-        response.put("success", true);
-        return ResponseEntity.ok().build();
-    }
+//    @GetMapping("/userlabels")
+//    ResponseEntity getUserLabelScores() throws IOException {
+//        ObjectNode response = objectMapper.createObjectNode();
+//        ArrayNode userLabelScores = objectMapper.createArrayNode();
+//        Iterator<UserLabelScore> iterator = userLabelScoreRepository.findAll().iterator();
+//        while(iterator.hasNext()) {
+//            UserLabelScore userLabelScore = iterator.next();
+//            ObjectNode userLabelScoreObject = objectMapper.createObjectNode();
+//            userLabelScoreObject.put("userId", userLabelScore.getUserId().getId());
+//            userLabelScoreObject.put("label", userLabelScore.getLabel());
+//            userLabelScoreObject.put("score", userLabelScore.getScore());
+//
+//            userLabelScores.add(userLabelScoreObject);
+//        }
+//
+//        analysisService.getSimilarities(userLabelScores);
+//
+//        response.put("success", true);
+//        return ResponseEntity.ok().build();
+//    }
 
     @GetMapping("/{id}")
     ResponseEntity getTravelPost(@PathVariable Long id){

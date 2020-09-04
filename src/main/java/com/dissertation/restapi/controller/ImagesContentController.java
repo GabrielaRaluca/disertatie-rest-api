@@ -9,6 +9,7 @@ import com.dissertation.restapi.service.AnalysisService;
 import com.dissertation.restapi.service.VisionApiService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,8 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 @Transactional
@@ -29,6 +32,8 @@ public class ImagesContentController {
     private final TravelPostRepository travelPostRepository;
     private final VisionApiService visionApiService;
     private final AnalysisService analysisService;
+
+    ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -111,6 +116,14 @@ public class ImagesContentController {
 
             response.put("success", true);
 
+            threadPoolExecutor.execute(() -> {
+                try {
+                    analysisService.getUserLabelScore();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+
             return ResponseEntity.ok(response);
         }
     }
@@ -167,7 +180,13 @@ public class ImagesContentController {
             travelPostRepository.save(travelPost);
 
             response.put("success", true);
-
+            threadPoolExecutor.execute(() -> {
+                try {
+                    analysisService.getUserLabelScore();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             return ResponseEntity.ok(response);
         }
     }
