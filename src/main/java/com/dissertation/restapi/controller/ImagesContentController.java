@@ -17,9 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -148,6 +145,8 @@ public class ImagesContentController {
 
                 try {
                     List<Label> imageLabels = visionApiService.getLabels(imagesContent);
+                    analysisService.calculatePreferences(travelPost.getUploader(),
+                            travelPost.getScore(), imageLabels);
                 } catch (IOException e) {
                     e.printStackTrace();
                     response.put("success", false);

@@ -1,16 +1,11 @@
 package com.dissertation.restapi.controller;
 
-
-import com.dissertation.restapi.exception.BadRequestException;
-import com.dissertation.restapi.exception.EntityNotFoundException;
 import com.dissertation.restapi.login.GoogleLogin;
 import com.dissertation.restapi.model.User;
 import com.dissertation.restapi.repository.UserRepository;
 import com.dissertation.restapi.service.token.JwtAccessTokenManager;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
@@ -87,6 +82,39 @@ public class UserController {
             userData.put("email", user.getEmail());
             userData.put("name", user.getName());
             userData.put("picture_url", user.getPictureUrl());
+            userData.put("description", user.getDescription());
+
+            responseBody.put("success", true);
+            responseBody.set("data", userData);
+
+            return ResponseEntity.ok(responseBody);
+        }
+    }
+
+    @PutMapping(value = "/user/{id}")
+    ResponseEntity updateUser(@PathVariable Long id, @RequestBody User body) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        ObjectNode responseBody = objectMapper.createObjectNode();
+
+        if (!optionalUser.isPresent()) {
+            responseBody.put("success", false);
+            responseBody.put("message", "No user exists with id " + id);
+            responseBody.put("statusCode", 400);
+
+            return ResponseEntity.badRequest().body(responseBody);
+
+        } else {
+            User user = optionalUser.get();
+            user.setDescription(body.getDescription());
+
+            userRepository.save(user);
+
+            ObjectNode userData = objectMapper.createObjectNode();
+            userData.put("id", user.getId());
+            userData.put("email", user.getEmail());
+            userData.put("name", user.getName());
+            userData.put("picture_url", user.getPictureUrl());
+            userData.put("description", user.getDescription());
 
             responseBody.put("success", true);
             responseBody.set("data", userData);

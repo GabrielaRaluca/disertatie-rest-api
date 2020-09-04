@@ -35,4 +35,8 @@ public class User {
     @ManyToMany
     List<User> unfollowed;
 
+    @Column
+    @ManyToMany
+    List<User> following;
+
 }

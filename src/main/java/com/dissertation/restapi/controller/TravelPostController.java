@@ -8,6 +8,7 @@ import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
 import com.dissertation.restapi.repository.UserLabelScoreRepository;
 import com.dissertation.restapi.repository.UserRepository;
+import com.dissertation.restapi.service.AnalysisService;
 import com.dissertation.restapi.service.SentimentAnalysis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -33,6 +34,7 @@ public class TravelPostController {
     private final ImagesContentRepository imagesContentRepository;
     private final SentimentAnalysis sentimentAnalysis;
     private final UserLabelScoreRepository userLabelScoreRepository;
+    private final AnalysisService analysisService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -40,12 +42,14 @@ public class TravelPostController {
                                 UserRepository userRepository,
                                 ImagesContentRepository imagesContentRepository,
                                 SentimentAnalysis sentimentAnalysis,
-                                UserLabelScoreRepository userLabelScoreRepository){
+                                UserLabelScoreRepository userLabelScoreRepository,
+                                AnalysisService analysisService){
         this.travelPostRepository = travelPostRepository;
         this.userRepository = userRepository;
         this.imagesContentRepository = imagesContentRepository;
         this.sentimentAnalysis = sentimentAnalysis;
         this.userLabelScoreRepository = userLabelScoreRepository;
+        this.analysisService = analysisService;
     }
 
     @GetMapping("/userlabels")
@@ -63,7 +67,7 @@ public class TravelPostController {
             userLabelScores.add(userLabelScoreObject);
         }
 
-        sentimentAnalysis.getSimilarities(userLabelScores);
+        analysisService.getSimilarities(userLabelScores);
 
         response.put("success", true);
         return ResponseEntity.ok().build();
@@ -103,7 +107,6 @@ public class TravelPostController {
         }
     }
 
-
     @GetMapping()
     ResponseEntity getTravelPost(){
         Iterable<TravelPost> travelPosts = travelPostRepository.findAll();
@@ -135,7 +138,8 @@ public class TravelPostController {
 
     @GetMapping("/user/{userId}")
     ResponseEntity getTravelPostsByUserId(@PathVariable Long userId) {
-        Optional<List<TravelPost>> optionalTravelPosts = travelPostRepository.findByUploaderId(userId);
+        Optional<List<TravelPost>> optionalTravelPosts = travelPostRepository
+                .findAllByUploaderIdOrderByCreationDateDesc(userId);
         ObjectNode response = objectMapper.createObjectNode();
         ArrayNode responseArray = objectMapper.createArrayNode();
 
@@ -293,6 +297,53 @@ public class TravelPostController {
 
             response.put("success", true);
 
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @GetMapping(value = "/user/following/{userId}")
+    ResponseEntity getFollowingPosts(@PathVariable Long userId) {
+        ObjectNode response = objectMapper.createObjectNode();
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(!optionalUser.isPresent()) {
+            response.put("success", false);
+            response.put("message", "No user exists with id " + userId);
+            response.put("statusCode", 400);
+
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            User user = optionalUser.get();
+            ArrayNode responseArray = objectMapper.createArrayNode();
+
+            for(User following: user.getFollowing()) {
+                Optional<List<TravelPost>> optionalTravelPosts = travelPostRepository
+                        .findAllByUploaderIdOrderByCreationDateDesc(following.getId());
+
+                if(optionalTravelPosts.isPresent()) {
+                    List<TravelPost> travelPosts = optionalTravelPosts.get();
+
+                    for(TravelPost travelPost : travelPosts) {
+                        ArrayNode imagesIds = objectMapper.createArrayNode();
+                        travelPost.getImages().forEach(imagesContent -> imagesIds.add(imagesContent.getId()));
+
+                        ObjectNode userData = objectMapper.createObjectNode();
+                        userData.put("id", travelPost.getId());
+                        userData.put("description", travelPost.getDescription());
+                        userData.put("title", travelPost.getTitle());
+                        userData.put("location", travelPost.getLocation());
+                        userData.put("creationDate", travelPost.getCreationDate().toString());
+                        userData.put("uploaderId", travelPost.getUploader().getId());
+                        userData.put("uploaderImage", travelPost.getUploader().getPictureUrl());
+                        userData.put("uploaderName", travelPost.getUploader().getName());
+                        userData.set("images", imagesIds);
+
+                        responseArray.add(userData);
+                    }
+                }
+            }
+            response.set("data", responseArray);
+            response.put("success", true);
             return ResponseEntity.ok(response);
         }
     }

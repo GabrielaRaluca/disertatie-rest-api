@@ -1,8 +1,9 @@
 package com.dissertation.restapi.service;
 
+import com.dissertation.restapi.repository.UserLabelScoreRepository;
+import com.dissertation.restapi.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -13,13 +14,19 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
-
 @Service
 public class SentimentAnalysis {
     @Value("${analyzer.sentimentUrl}") String analyzerApi;
 
     RestTemplate restTemplate = new RestTemplate();
     ObjectMapper objectMapper = new ObjectMapper();
+    private final UserRepository userRepository;
+    private final UserLabelScoreRepository userLabelScoreRepository;
+
+    public SentimentAnalysis(UserRepository userRepository, UserLabelScoreRepository userLabelScoreRepository) {
+        this.userRepository = userRepository;
+        this.userLabelScoreRepository = userLabelScoreRepository;
+    }
 
     public float analyze(String description) throws IOException {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -37,17 +44,4 @@ public class SentimentAnalysis {
         return score;
     }
 
-    public void getSimilarities(ArrayNode reqBody) throws IOException {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        ObjectNode body = objectMapper.createObjectNode();
-        body.set("scores", reqBody);
-
-        HttpEntity<String> request = new HttpEntity(body, httpHeaders);
-        String results = restTemplate.postForObject(analyzerApi + "/similarity", request, String.class);
-
-        JsonNode response = objectMapper.readTree(results);
-        //TODO
-    }
 }
