@@ -93,4 +93,4 @@ def analyse():
     sentence = data['description']
     return sentiment_scores(sentence)
 
-app.run()
+app.run(host='0.0.0.0')

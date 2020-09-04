@@ -263,6 +263,13 @@ public class TravelPostController {
             travelPost.setLocation(travelPostBody.get("location").asText());
             travelPost.setImages(currentImages);
 
+            try {
+                float score = sentimentAnalysis.analyze(travelPostBody.get("description").asText());
+                travelPost.setScore(score);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             travelPostRepository.save(travelPost);
 
             ObjectNode userData = objectMapper.createObjectNode();
