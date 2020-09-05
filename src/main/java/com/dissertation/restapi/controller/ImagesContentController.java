@@ -9,7 +9,6 @@ import com.dissertation.restapi.service.AnalysisService;
 import com.dissertation.restapi.service.VisionApiService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 @Transactional
-@RequestMapping("/imagescontent")
+@RequestMapping("/api/imagescontent")
 @CrossOrigin(origins = "*")
 public class ImagesContentController {
     private final ImagesContentRepository imagesContentRepository;

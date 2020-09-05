@@ -3,7 +3,6 @@ package com.dissertation.restapi.controller;
 import com.dissertation.restapi.model.ImagesContent;
 import com.dissertation.restapi.model.TravelPost;
 import com.dissertation.restapi.model.User;
-import com.dissertation.restapi.model.UserLabelScore;
 import com.dissertation.restapi.repository.ImagesContentRepository;
 import com.dissertation.restapi.repository.TravelPostRepository;
 import com.dissertation.restapi.repository.UserLabelScoreRepository;
@@ -20,13 +19,12 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @Transactional
-@RequestMapping("/travelpost")
+@RequestMapping("/api/travelpost")
 @CrossOrigin(origins = "*")
 public class TravelPostController {
     private final TravelPostRepository travelPostRepository;

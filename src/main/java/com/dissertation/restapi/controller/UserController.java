@@ -16,7 +16,7 @@ import java.util.Optional;
 @Transactional
 @CrossOrigin(origins = "*")
 @RestController
-//@RequestMapping(path="/users")
+@RequestMapping(path="/api")
 public class UserController {
 
     private final GoogleLogin googleLogin;
