@@ -321,32 +321,32 @@ public class TravelPostController {
             User user = optionalUser.get();
             ArrayNode responseArray = objectMapper.createArrayNode();
 
-            for(User following: user.getFollowing()) {
-                Optional<List<TravelPost>> optionalTravelPosts = travelPostRepository
-                        .findAllByUploaderIdOrderByCreationDateDesc(following.getId());
 
-                if(optionalTravelPosts.isPresent()) {
-                    List<TravelPost> travelPosts = optionalTravelPosts.get();
+            Optional<List<TravelPost>> optionalTravelPosts = travelPostRepository
+                    .findAllByUploaderInOrderByCreationDateDesc(user.getFollowing());
 
-                    for(TravelPost travelPost : travelPosts) {
-                        ArrayNode imagesIds = objectMapper.createArrayNode();
-                        travelPost.getImages().forEach(imagesContent -> imagesIds.add(imagesContent.getId()));
+            if(optionalTravelPosts.isPresent()) {
+                List<TravelPost> travelPosts = optionalTravelPosts.get();
 
-                        ObjectNode userData = objectMapper.createObjectNode();
-                        userData.put("id", travelPost.getId());
-                        userData.put("description", travelPost.getDescription());
-                        userData.put("title", travelPost.getTitle());
-                        userData.put("location", travelPost.getLocation());
-                        userData.put("creationDate", travelPost.getCreationDate().toString());
-                        userData.put("uploaderId", travelPost.getUploader().getId());
-                        userData.put("uploaderImage", travelPost.getUploader().getPictureUrl());
-                        userData.put("uploaderName", travelPost.getUploader().getName());
-                        userData.set("images", imagesIds);
+                for(TravelPost travelPost : travelPosts) {
+                    ArrayNode imagesIds = objectMapper.createArrayNode();
+                    travelPost.getImages().forEach(imagesContent -> imagesIds.add(imagesContent.getId()));
 
-                        responseArray.add(userData);
-                    }
+                    ObjectNode userData = objectMapper.createObjectNode();
+                    userData.put("id", travelPost.getId());
+                    userData.put("description", travelPost.getDescription());
+                    userData.put("title", travelPost.getTitle());
+                    userData.put("location", travelPost.getLocation());
+                    userData.put("creationDate", travelPost.getCreationDate().toString());
+                    userData.put("uploaderId", travelPost.getUploader().getId());
+                    userData.put("uploaderImage", travelPost.getUploader().getPictureUrl());
+                    userData.put("uploaderName", travelPost.getUploader().getName());
+                    userData.set("images", imagesIds);
+
+                    responseArray.add(userData);
                 }
             }
+
             response.set("data", responseArray);
             response.put("success", true);
             return ResponseEntity.ok(response);
