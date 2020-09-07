@@ -87,7 +87,8 @@ public class AnalysisService {
                             .findById(Long.parseLong(fEntry.getValue().toString()));
                     if(optionalFollowing.isPresent()) {
                         User following = optionalFollowing.get();
-                        user.getFollowing().add(following);
+                        if (!user.getFollowing().contains(following))
+                            user.getFollowing().add(following);
                     }
                 }
                 userRepository.save(user);
